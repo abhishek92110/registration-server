@@ -112,6 +112,9 @@ router.get('/',async(req,res)=>{
 // })
 
 router.post("/google-sheet-data",async(req,res) =>{
+
+    console.log("index no is from google sheet data route=",req.body.month)
+
 const beforeMemoryUsage = process.memoryUsage();
     try{
           
@@ -126,11 +129,11 @@ const beforeMemoryUsage = process.memoryUsage();
       });
 
     // const doc = new GoogleSpreadsheet('1Uyn8D87__CUhM0m08kpS63cD2nbw7DI6j3bVUkWZm_4', serviceAccountAuth);
-    // const doc = new GoogleSpreadsheet('1_PMdmi3cd24bTEt3IVANPUvMxYQCQ8t-0zxNSOOF_JU', serviceAccountAuth);
-    const doc = new GoogleSpreadsheet('1Bjm39FwtIFSQKL5Xc-jBp5OpmQt3czMPYLbMWit6r5Q', serviceAccountAuth);
+    const doc = new GoogleSpreadsheet('1_PMdmi3cd24bTEt3IVANPUvMxYQCQ8t-0zxNSOOF_JU', serviceAccountAuth);
+    // const doc = new GoogleSpreadsheet('1Bjm39FwtIFSQKL5Xc-jBp5OpmQt3czMPYLbMWit6r5Q', serviceAccountAuth);
 
     await doc.loadInfo(); // loads document properties and worksheets
-    const sheet = doc.sheetsByIndex[2];
+    const sheet = doc.sheetsByIndex[5];
    
       
       console.log(doc.title);
@@ -323,7 +326,7 @@ const beforeMemoryUsage = process.memoryUsage();
 // const spreadsheetId = '1_PMdmi3cd24bTEt3IVANPUvMxYQCQ8t-0zxNSOOF_JU'
 
 router.post("/update-google-sheet-data", async (req, res) => {
-    console.log('update google =', req.body);
+    console.log('update google sheet month=', req.body.month);
   
     try {
       const serviceAccountAuth = new JWT({
@@ -332,11 +335,11 @@ router.post("/update-google-sheet-data", async (req, res) => {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
   
-    //   const doc = new GoogleSpreadsheet('1_PMdmi3cd24bTEt3IVANPUvMxYQCQ8t-0zxNSOOF_JU', serviceAccountAuth);
-      const doc = new GoogleSpreadsheet('1Bjm39FwtIFSQKL5Xc-jBp5OpmQt3czMPYLbMWit6r5Q', serviceAccountAuth);
+      const doc = new GoogleSpreadsheet('1_PMdmi3cd24bTEt3IVANPUvMxYQCQ8t-0zxNSOOF_JU', serviceAccountAuth);
+    //   const doc = new GoogleSpreadsheet('1Bjm39FwtIFSQKL5Xc-jBp5OpmQt3czMPYLbMWit6r5Q', serviceAccountAuth);
   
       await doc.loadInfo(); // loads document properties and worksheets
-      const sheet = doc.sheetsByIndex[2];
+      const sheet = doc.sheetsByIndex[5];
   
     //   const rows = await sheet.getRows({
     //     query: `Enrollment_Id = '${req.body.oldRegistrationNo}'`
@@ -404,6 +407,8 @@ router.post("/update-google-sheet-data", async (req, res) => {
 
 
   router.post('/edit-google-sheet', async (req, res) => {
+
+    console.log("index no is =",req.body.month)
    
 
     try {
@@ -413,12 +418,12 @@ router.post("/update-google-sheet-data", async (req, res) => {
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 
-        // const doc = new GoogleSpreadsheet('1_PMdmi3cd24bTEt3IVANPUvMxYQCQ8t-0zxNSOOF_JU', serviceAccountAuth);
-        const doc = new GoogleSpreadsheet('1Bjm39FwtIFSQKL5Xc-jBp5OpmQt3czMPYLbMWit6r5Q', serviceAccountAuth);
+        const doc = new GoogleSpreadsheet('1_PMdmi3cd24bTEt3IVANPUvMxYQCQ8t-0zxNSOOF_JU', serviceAccountAuth);
+        // const doc = new GoogleSpreadsheet('1Bjm39FwtIFSQKL5Xc-jBp5OpmQt3czMPYLbMWit6r5Q', serviceAccountAuth);
 
         await doc.loadInfo(); // loads document properties and worksheets
 
-        const sheet = doc.sheetsByIndex[2];
+        const sheet = doc.sheetsByIndex[5];
         let index = parseInt(req.body.index)
 
         console.log('req body =',req.body)
@@ -1094,6 +1099,40 @@ router.post("/updateRegisterStudent", async (req, res) => {
     }
 });
 
+// update register student with mail 
+
+router.post("/updateRegisterStudentMail", async (req, res) => {
+    
+    // console.log("register route =", req.body)
+    try {
+    const totalMonthRegistration = await totalRegistration.find({"month":req.body.month,"year":req.body.year})
+    const Student = await registerStudentDev.findOne({"RegistrationNo":req.body.RegistrationNo})
+
+
+        const updateRegistration = await updateRegisterNo(totalMonthRegistration,Student,req.body)
+        console.log('update registration',updateRegistration)
+        let oldRegistrationNo = req.body.RegistrationNo
+        req.body.RegistrationNo = updateRegistration
+       req.body.RemainingFees = req.body.CourseFees - req.body.RegistrationFees
+                    console.log("RemainingFees =",req.body.RemainingFees)
+
+    
+
+  
+        const savedUser = await registerStudentDev.updateOne({RegistrationNo:oldRegistrationNo},req.body)
+        const data = await registerStudentDev.findOne({RegistrationNo:req.body.RegistrationNo})
+        req.body.oldRegistrationNo = oldRegistrationNo;      
+            
+       
+        res.status(200).json(req.body);
+        sendmail(req, res)
+        console.log('updated register student =',savedUser,data)
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: "Something went wrong" });
+    }
+});
+
 router.post("/registerStudent", async (req, res) => {
       // const lastStudent = await registerStudentDev.findOne({}, {}, { sort: { _id: -1 } }).exec();
       try {
@@ -1423,6 +1462,22 @@ const updateRegisterNo = async(totalMonthRegistration,Student,data) => {
 router.get("/getregisterStudent", async (req, res) => {
     try {
         const userdata = await registerStudentDev.find();
+        res.status(200).json(userdata);
+    } catch (error) {
+        console.log('error =', error.message)
+        res.status(500).json(error);
+    }
+});
+
+// get student month wise
+
+
+router.get("/getregisterStudentMonth", async (req, res) => {
+
+    const currentMonth = req.header("month")
+
+    try {
+        const userdata = await registerStudentDev.find({month:currentMonth});
         res.status(200).json(userdata);
     } catch (error) {
         console.log('error =', error.message)

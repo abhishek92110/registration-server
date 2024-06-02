@@ -230,7 +230,7 @@ const sendmail = async (req, res) => {
             }
             .logo1 {
                 height: 54px !important;
-                width:  !important;
+                width: 163px !important;
             }
             .heading {
                 margin: -23px 0;
@@ -423,37 +423,59 @@ const sendmail = async (req, res) => {
             port: 465,
             secure: true,
             auth: {
-                user: 'vinay.uncodemy@gmail.com',
-                pass: 'evwptfyxlwhaegvj'
+                // user: 'vinay.uncodemy@gmail.com',
+                // pass: 'evwptfyxlwhaegvj'
+                user: 'account@uncodemy.com',
+                pass: 'enuvnrptyrgolyjk'
             },
         });
 
         transporter.sendMail({
-            from: "vinay.uncodemy@gmail.com",
+            from: "account@uncodemy.com",
             to: email,
             subject: "Registration Acknowledgement Receipt",
             text: `Please find attached`,
-            html: `Dear ${req.body.Name},
+            html: `<b>Dear ${req.body.Name}</b>,
+            <br><br>
+            Welcome to Uncodemy Edutech Pvt. Ltd., India's top IT Training Institute!
+            <br><br>
+            <b>Congratulations!</b> on your registration in <b>${req.body.subCourse}</b> Industrial Training Program . We are known for <b>${req.body.subCourse}</b> Training & placement from many years.
+            <br><br>
+
+            Here are your Registration Details, plz save it for further communication with us:
+            <br><br>
+            <b>Your Course Fee Details :</b> 
+            <br><br>
+            <b>Course Name:</b> ${req.body.subCourse}
             <br>
-            Congratulations!! on taking this monumental step forward to join Uncodemy. Your adventure in  Java Full Stack Course begins now, and we're here to make sure it's nothing short of exceptional. Here are the details regarding your Course & fee payments:
-            <br><br>
-            Your Course Fee Details : 
-            <br><br>
-            Total Fees: ${req.body.CourseFees}/-
+            <b>Date of Registration:</b> ${req.body.RegistrationDate}
             <br>
-            Payment Option Chosen:${req.body.PaymentMethod}  (No. of Installments)
-            <br><br>
-            Registration Amount: ${req.body.RegistrationFees}/-  (Registration receipt Enclosed)
+            <b>Total Fees:</b> ${req.body.CourseFees}/-
             <br>
-            Pending Amount: ${req.body.RemainingFees}/- (in 2 Instalments)
-            <br><br>
-            1st Instalment : After 3 Days of Batch allocation.
+            <b>Payment Option Chosen:</b> ${req.body.PaymentMethod}  
             <br>
-            2nd Instalment : With in 30 Days of the Date of Batch Allocation.
+            <b>Registration Amount:</b> ${req.body.RegistrationFees}/-  (Registration receipt Enclosed)
+            <br>
+            <b>Pending Amount:</b> ${req.body.RemainingFees}/- 
+    ${req.body.RemainingFees !== 0 ? `${req.body.PaymentMethod === "OTP" ? "(in One Time)" : req.body.PaymentMethod === "EMI" ? `(${req.body.PaymentMode})`:`(in ${req.body.totalInstallment})`}` : ''}
+
+            <br>
+            <b>Enrollment ID:</b> ${req.body.RegistrationNo}
             <br><br>
-            <b>Note:</b> If you failed to make your payment on time, A late fee ₹500/- per day will be applicable accordingly.
+            
+            <b>Note:</b>
+            <br>
+            1. Payments of your Instalments is subject to following T&C:
+            <br>
+            <b>1st Instalment :</b> After 3 Days of Batch allocation.
+            <br>
+            <b>2nd Instalment :</b> With in 30 Days of the Date of Batch Allocation.
             <br><br>
-            PLEASE READ CAREFULLY BELOW POINTS : 
+            2. If you failed to make your payment on time, A late fee ₹500/- per day will be applicable accordingly.
+            <br>
+            3. <b>Your batch allocation is pending. So it is advised to you that you please join your batches as soon as possible or within 60 days of your date of registration; otherwise, your registration will be cancelled.</b>
+            <br><br>
+            <b>PLEASE READ CAREFULLY BELOW POINTS : </b>
             <br><br> 
             1. This is a Registration acknowledgement receipt only. Your admission in the mentioned course is subject to full fee payment, EMI document submission, and instalment payment within 7 days of batch allocation.<br>
             2. Students who choose the instalments/EMI option may ensure to pay the instalments and submit the EMI document within 7 days of starting the batch, failing which a ₹500/- per day late fee will be charged.<br>
